@@ -1,2 +1,5 @@
 gtfs_data/*
 gtfs_data
+
+
+__pycache__
