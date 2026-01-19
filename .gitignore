@@ -1,5 +1,6 @@
-gtfs_data/*
-gtfs_data
+# gtfs_data/*
+*.txt
+# gtfs_data
 
 
 __pycache__
