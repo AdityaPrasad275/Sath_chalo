@@ -1,0 +1,80 @@
+.stop-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    width: 100%;
+    padding: var(--space-4);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    text-align: left;
+    transition: background var(--transition-base);
+    cursor: pointer;
+}
+
+.stop-card:hover {
+    background: var(--bg-tertiary);
+}
+
+.stop-card:active {
+    transform: scale(0.99);
+}
+
+.stop-card__icon {
+    color: var(--accent-primary);
+    font-size: var(--text-lg);
+    flex-shrink: 0;
+}
+
+.stop-card__content {
+    flex: 1;
+    min-width: 0;
+}
+
+.stop-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-2);
+}
+
+.stop-card__name {
+    font-size: var(--text-base);
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stop-card__distance {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.stop-card__routes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.stop-card__route {
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+}
+
+.stop-card__more {
+    font-size: var(--text-xs);
+    color: var(--text-tertiary);
+    padding: var(--space-1) var(--space-2);
+}
+
+.stop-card__arrow {
+    color: var(--text-tertiary);
+    font-size: var(--text-xl);
+    flex-shrink: 0;
+}
