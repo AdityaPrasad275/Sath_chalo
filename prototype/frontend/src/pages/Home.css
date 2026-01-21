@@ -11,14 +11,26 @@
 }
 
 .home__title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
     font-size: var(--text-2xl);
     font-weight: 600;
     text-align: center;
 }
 
+.home__title-icon {
+    width: 28px;
+    height: 28px;
+    color: var(--accent-primary);
+}
+
 .home__mock-badge {
-    display: block;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
     font-size: var(--text-xs);
     color: var(--accent-primary);
     background: rgba(245, 158, 11, 0.15);
@@ -26,6 +38,33 @@
     border-radius: var(--radius-full);
     margin: var(--space-2) auto 0;
     width: fit-content;
+}
+
+.home__mock-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.home__location-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.home__section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-3);
+}
+
+.home__section-icon {
+    width: 16px;
+    height: 16px;
 }
 
 .home__main {
@@ -141,15 +180,6 @@
 /* Stops List */
 .home__stops {
     animation: fadeIn 200ms ease;
-}
-
-.home__section-title {
-    font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: var(--space-3);
 }
 
 .home__stops-list {

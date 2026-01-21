@@ -1,4 +1,5 @@
 import { formatDistance } from '../../utils/geo';
+import { StopDotIcon, ChevronRightIcon } from '../icons';
 import './StopCard.css';
 
 /**
@@ -10,7 +11,7 @@ export function StopCard({ stop, distance, onClick }) {
 
     return (
         <button className="stop-card" onClick={onClick}>
-            <div className="stop-card__icon">●</div>
+            <StopDotIcon className="stop-card__icon" filled />
             <div className="stop-card__content">
                 <div className="stop-card__header">
                     <span className="stop-card__name">{stop.stop_name || stop.name}</span>
@@ -31,7 +32,7 @@ export function StopCard({ stop, distance, onClick }) {
                     </div>
                 )}
             </div>
-            <div className="stop-card__arrow">›</div>
+            <ChevronRightIcon className="stop-card__arrow" />
         </button>
     );
 }

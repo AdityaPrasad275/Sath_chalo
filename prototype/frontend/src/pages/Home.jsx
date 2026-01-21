@@ -3,6 +3,7 @@ import { useGeolocation } from '../hooks/useGeolocation';
 import { getNearbyStops, searchStops } from '../utils/api';
 import { getDistance } from '../utils/geo';
 import { StopCard } from '../components/stops/StopCard';
+import { BusIcon, MapPinIcon, FlaskIcon, SearchIcon } from '../components/icons';
 import './Home.css';
 
 export function Home() {
@@ -120,9 +121,15 @@ export function Home() {
     return (
         <div className="home">
             <header className="home__header">
-                <h1 className="home__title">🚌 Bus Radar</h1>
+                <h1 className="home__title">
+                    <BusIcon className="home__title-icon" />
+                    <span>Bus Radar</span>
+                </h1>
                 {isMocked && (
-                    <span className="home__mock-badge">🧪 Mock Location</span>
+                    <span className="home__mock-badge">
+                        <FlaskIcon className="home__mock-icon" />
+                        <span>Mock Location</span>
+                    </span>
                 )}
             </header>
 
@@ -146,7 +153,7 @@ export function Home() {
                         onClick={requestLocation}
                         disabled={geoLoading}
                     >
-                        <span className="home__location-icon">📍</span>
+                        <MapPinIcon className="home__location-icon" />
                         <span>Use my location</span>
                     </button>
                 )}
@@ -175,7 +182,11 @@ export function Home() {
                 {showStops && (
                     <div className="home__stops">
                         <h2 className="home__section-title">
-                            {searchQuery ? 'Search Results' : '📍 Stops Near You'}
+                            {searchQuery ? (
+                                <><SearchIcon className="home__section-icon" /> Search Results</>
+                            ) : (
+                                <><MapPinIcon className="home__section-icon" /> Stops Near You</>
+                            )}
                         </h2>
                         <div className="home__stops-list">
                             {stops.map((stop) => (
