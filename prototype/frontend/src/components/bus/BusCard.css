@@ -1,0 +1,75 @@
+.bus-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-4);
+    background: var(--bg-secondary);
+    border-radius: var(--radius-lg);
+    text-align: left;
+    transition: background var(--transition-base);
+    cursor: pointer;
+}
+
+.bus-card:hover {
+    background: var(--bg-tertiary);
+}
+
+.bus-card--departed {
+    opacity: 0.5;
+}
+
+/* Header with route info and chevron */
+.bus-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.bus-card__route {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.bus-card__route-name {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.bus-card__arrow {
+    color: var(--text-tertiary);
+}
+
+.bus-card__headsign {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+}
+
+.bus-card__chevron {
+    width: 20px;
+    height: 20px;
+    color: var(--text-tertiary);
+    flex-shrink: 0;
+}
+
+/* Timeline section */
+.bus-card__timeline {
+    padding: var(--space-2) 0;
+}
+
+/* Time display */
+.bus-card__time {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.bus-card__time-value {
+    font-size: var(--text-2xl);
+    font-weight: 600;
+    color: var(--accent-primary);
+}

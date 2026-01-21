@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { formatDistance } from '../../utils/geo';
 import { StopDotIcon, ChevronRightIcon } from '../icons';
 import './StopCard.css';
@@ -5,12 +6,13 @@ import './StopCard.css';
 /**
  * StopCard - displays a single stop with distance and routes
  */
-export function StopCard({ stop, distance, onClick }) {
+export function StopCard({ stop, distance }) {
     // Extract routes from stop data if available
     const routes = stop.routes || [];
+    const stopId = stop.stop_id || stop.id;
 
     return (
-        <button className="stop-card" onClick={onClick}>
+        <Link to={`/stop/${stopId}`} className="stop-card">
             <StopDotIcon className="stop-card__icon" filled />
             <div className="stop-card__content">
                 <div className="stop-card__header">
@@ -33,6 +35,7 @@ export function StopCard({ stop, distance, onClick }) {
                 )}
             </div>
             <ChevronRightIcon className="stop-card__arrow" />
-        </button>
+        </Link>
     );
 }
+

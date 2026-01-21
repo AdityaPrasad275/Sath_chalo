@@ -29,7 +29,8 @@ export function useStops(position, searchQuery) {
 
             return {
                 ...properties,
-                id: properties.stop_id || properties.id,
+                id: stop.id || properties.stop_id || properties.id,
+                stop_id: stop.id || properties.stop_id || properties.id,
                 lat: stopLat,
                 lon: stopLon,
                 distance
