@@ -20,7 +20,7 @@ class Route(models.Model):
 class Trip(models.Model):
     trip_id = models.CharField(max_length=255, primary_key=True)
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='trips')
-    direction_id = models.IntegerField(null=True, blank=True)
+    headed_to = models.CharField(max_length=255, null=True, blank=True)
     shape_id = models.CharField(max_length=255, null=True, blank=True)
     service_id = models.CharField(max_length=255)
 

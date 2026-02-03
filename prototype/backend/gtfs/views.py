@@ -17,23 +17,36 @@ class StopViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=['get'])
     def upcoming(self, request, pk=None):
-        stop = self.get_object()
-        now = timezone.now().time()
+        from django.db.models import Q
         
-        # User can provide a time like HH:MM:SS
-        user_time = request.query_params.get('time')
-        if user_time:
-            try:
-                now = datetime.datetime.strptime(user_time, '%H:%M:%S').time()
-            except ValueError:
-                pass # Fallback to current time
+        stop = self.get_object()
+        now = timezone.localtime(timezone.now()).time()
+        
+        # Calculate window: 15 mins ago to 2 hours from now
+        today = datetime.date.today()
+        now_dt = datetime.datetime.combine(today, now)
+        
+        start_dt = now_dt - datetime.timedelta(minutes=15)
+        end_dt = now_dt + datetime.timedelta(hours=1)
+        
+        start_time = start_dt.time()
+        end_time = end_dt.time()
 
-        # Filter stop times for this stop, arriving after 'now'
+        # Filter stop times for this stop, arriving between start and end
         # We assume services running today for MVP (ignoring service_id for a moment)
-        queryset = StopTime.objects.filter(
-            stop=stop,
-            arrival_time__gte=now
-        ).select_related('trip', 'trip__route').order_by('arrival_time')
+        if start_time > end_time:
+            # Crosses midnight: Get times >= start OR times <= end
+            queryset = StopTime.objects.filter(
+                stop=stop
+            ).filter(
+                Q(arrival_time__gte=start_time) | Q(arrival_time__lte=end_time)
+            ).select_related('trip', 'trip__route').order_by('arrival_time')
+        else:
+            # Standard case
+            queryset = StopTime.objects.filter(
+                stop=stop,
+                arrival_time__range=(start_time, end_time)
+            ).select_related('trip', 'trip__route').order_by('arrival_time')
 
         page = self.paginate_queryset(queryset)
         if page is not None:
@@ -42,7 +55,7 @@ class StopViewSet(viewsets.ReadOnlyModelViewSet):
 
         serializer = UpcomingTripSerializer(queryset, many=True)
         return Response(serializer.data)
-
+    
 class RouteViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Route.objects.all()
     serializer_class = RouteSerializer
@@ -50,7 +63,7 @@ class RouteViewSet(viewsets.ReadOnlyModelViewSet):
 class TripViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Trip.objects.all()
     serializer_class = TripSerializer
-    filterset_fields = ['route__route_id', 'direction_id']
+    filterset_fields = ['route__route_id', 'headed_to']
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

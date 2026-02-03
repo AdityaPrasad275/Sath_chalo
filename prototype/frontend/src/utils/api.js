@@ -49,6 +49,19 @@ export async function getUpcomingTrips(stopId, time) {
 }
 
 /**
+ * Get stop details by ID
+ * @param {string} stopId - stop ID
+ */
+export async function getStopDetails(stopId) {
+    const url = `${API_BASE}/gtfs/stops/${stopId}/`;
+    const res = await fetch(url);
+    if (!res.ok) {
+        throw new Error(`Failed to fetch stop details: ${res.status}`);
+    }
+    return res.json();
+}
+
+/**
  * Get trip details including all stop times
  * @param {string} tripId - trip ID
  */

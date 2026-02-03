@@ -27,7 +27,7 @@ class TripSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Trip
-        fields = ['trip_id', 'route', 'route_name', 'direction_id', 'shape_id']
+        fields = ['trip_id', 'route', 'route_name', 'headed_to', 'shape_id']
 
 class TripDetailSerializer(TripSerializer):
     stop_times = StopTimeSerializer(many=True, read_only=True)

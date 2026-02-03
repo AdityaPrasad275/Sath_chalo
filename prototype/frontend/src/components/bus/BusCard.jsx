@@ -19,8 +19,8 @@ export function BusCard({ trip, onClick }) {
     // API returns: { trip: { route: "R02", route_name: "200" }, arrival_time: "..." }
     const tripData = trip.trip || {};
     const routeName = tripData.route_name || tripData.route || 'Route';
-    const headsign = tripData.trip_headsign || '';
-
+    // const headsign = tripData.trip_headsign || '';
+    const headed_to = tripData.headed_to || '';
     // Determine if bus has departed
     const hasDeparted = minutesUntil < 0;
 
@@ -31,24 +31,26 @@ export function BusCard({ trip, onClick }) {
             type="button"
         >
             <div className="bus-card__header">
-                <div className="bus-card__route">
-                    <span className="bus-card__route-name">{routeName}</span>
-                    {headsign && (
-                        <>
-                            <span className="bus-card__arrow">→</span>
-                            <span className="bus-card__headsign">{headsign}</span>
-                        </>
+                <div className="bus-card__info">
+                    <div className="bus-card__route">
+                        <span className="bus-card__route-name">{routeName}</span>
+                    </div>
+                    {headed_to && (
+                        <div className="bus-card__destination">
+                            <span className="bus-card__headsign">{headed_to}</span>
+                        </div>
                     )}
                 </div>
-                <ChevronRightIcon className="bus-card__chevron" />
+
+                <div className="bus-card__time">
+                    <span className={`bus-card__time-value ${hasDeparted ? 'bus-card__time-value--late' : ''}`}>
+                        {relativeTime}
+                    </span>
+                </div>
             </div>
 
             <div className="bus-card__timeline">
-                <Timeline minutesUntil={minutesUntil} maxMinutes={15} />
-            </div>
-
-            <div className="bus-card__time">
-                <span className="bus-card__time-value">{relativeTime}</span>
+                <Timeline minutesUntil={minutesUntil} maxMinutes={60} />
             </div>
         </button>
     );

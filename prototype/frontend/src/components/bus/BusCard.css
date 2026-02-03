@@ -1,75 +1,99 @@
 .bus-card {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-4);
     width: 100%;
-    padding: var(--space-4);
+    padding: var(--space-5);
     background: var(--bg-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: var(--radius-lg);
     text-align: left;
-    transition: background var(--transition-base);
+    transition: all var(--transition-base);
     cursor: pointer;
 }
 
 .bus-card:hover {
     background: var(--bg-tertiary);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.bus-card--departed {
-    opacity: 0.5;
+/* Dim specific parts for departed buses */
+.bus-card--departed .bus-card__timeline {
+    opacity: 0.4;
 }
 
-/* Header with route info and chevron */
+/* Header: horizontal split between bus info and time */
 .bus-card__header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: var(--space-2);
+    gap: var(--space-4);
+}
+
+/* Left side: bus info */
+.bus-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    flex: 1;
+    min-width: 0;
+    /* Allow text truncation */
 }
 
 .bus-card__route {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    flex-wrap: wrap;
 }
 
 .bus-card__route-name {
-    font-size: var(--text-lg);
-    font-weight: 600;
+    font-size: var(--text-3xl);
+    font-weight: 700;
     color: var(--text-primary);
+    line-height: 1.2;
 }
 
-.bus-card__arrow {
-    color: var(--text-tertiary);
-}
-
-.bus-card__headsign {
-    font-size: var(--text-sm);
-    color: var(--text-secondary);
-}
-
-.bus-card__chevron {
-    width: 20px;
-    height: 20px;
-    color: var(--text-tertiary);
-    flex-shrink: 0;
-}
-
-/* Timeline section */
-.bus-card__timeline {
-    padding: var(--space-2) 0;
-}
-
-/* Time display */
-.bus-card__time {
+.bus-card__destination {
     display: flex;
     align-items: center;
     gap: var(--space-2);
 }
 
+.bus-card__arrow {
+    color: var(--text-tertiary);
+    font-size: var(--text-sm);
+}
+
+.bus-card__headsign {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Right side: time display */
+.bus-card__time {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
 .bus-card__time-value {
-    font-size: var(--text-2xl);
-    font-weight: 600;
+    font-size: var(--text-5xl);
+    font-weight: 700;
     color: var(--accent-primary);
+    line-height: 1;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.bus-card__time-value--late {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* Timeline section: spans full width */
+.bus-card__timeline {
+    width: 100%;
 }

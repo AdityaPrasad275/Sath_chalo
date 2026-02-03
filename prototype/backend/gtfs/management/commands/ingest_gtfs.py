@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
         self.import_stops(os.path.join(folder_path, 'stops.txt'))
         self.import_routes(os.path.join(folder_path, 'routes.txt'))
-        self.import_trips(os.path.join(folder_path, 'trips.txt'))
+        self.import_trips(os.path.join(folder_path, 'trips.txt'), os.path.join(folder_path, 'stop_times.txt'))
         self.import_stop_times(os.path.join(folder_path, 'stop_times.txt'))
         
         self.stdout.write(self.style.SUCCESS('Successfully ingested GTFS data'))
@@ -57,21 +57,43 @@ class Command(BaseCommand):
         Route.objects.bulk_create(routes)
         self.stdout.write(f"Created {len(routes)} routes.")
 
-    def import_trips(self, path):
+
+    def import_trips(self, path, stop_times_path):
+        self.stdout.write(f"Calculating trip destinations from {stop_times_path}...")
+        trip_destinations = {} # trip_id -> last_stop_id
+        trip_max_sequence = {} # trip_id -> max_sequence
+
+        # First pass: find last stop ID for each trip
+        with open(stop_times_path, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                uid = row['trip_id']
+                seq = int(row['stop_sequence'])
+                sid = row['stop_id']
+                
+                if uid not in trip_max_sequence or seq > trip_max_sequence[uid]:
+                    trip_max_sequence[uid] = seq
+                    trip_destinations[uid] = sid
+
+        # Load all stop names to memory for fast lookup
+        stop_names = dict(Stop.objects.values_list('stop_id', 'name'))
+
         self.stdout.write(f"Importing trips from {path}...")
         trips = []
-        # Cache routes to avoid DB hits if needed, but for bulk_create we just need ID if referencing directly? 
-        # Django bulk_create with ForeignKeys needs the instance or the ID. 
-        # Since we use simple string IDs for our models (primary_key=True), we can simple act as if they exist.
         
         with open(path, 'r', encoding='utf-8-sig') as f:
             reader = csv.DictReader(f)
             for row in reader:
+                tid = row['trip_id']
+                last_stop_id = trip_destinations.get(tid)
+                headed_to = stop_names.get(last_stop_id, "Unknown")
+
                 trips.append(Trip(
-                    trip_id=row['trip_id'],
+                    trip_id=tid,
                     route_id=row['route_id'], # Referencing the PK directly
                     service_id=row['service_id'],
-                    shape_id=row.get('shape_id')
+                    shape_id=row.get('shape_id'),
+                    headed_to=headed_to
                 ))
         Trip.objects.bulk_create(trips)
         self.stdout.write(f"Created {len(trips)} trips.")

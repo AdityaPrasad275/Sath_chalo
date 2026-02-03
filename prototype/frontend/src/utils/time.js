@@ -41,16 +41,17 @@ export function getMinutesUntil(arrivalTime) {
  */
 export function formatRelativeTime(minutes) {
     if (minutes < 0) {
-        return 'Departed';
+        const absMins = Math.abs(Math.round(minutes));
+        return `${absMins} min ago`;
     }
     if (minutes === 0) {
-        return 'Arriving';
+        return 'Just Arriving';
     }
     if (minutes < 1) {
         return '< 1 min';
     }
     if (minutes < 60) {
-        return `${Math.round(minutes)} min`;
+        return `In ${Math.round(minutes)} min`;
     }
     const hours = Math.floor(minutes / 60);
     const mins = Math.round(minutes % 60);

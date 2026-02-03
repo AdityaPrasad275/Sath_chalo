@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useUpcomingTrips } from '../hooks/useUpcomingTrips';
+import { getStopDetails } from '../utils/api';
 import { BusCard } from '../components/bus/BusCard';
 import { ArrowLeftIcon, MapPinIcon } from '../components/icons';
 import './Stop.css';
@@ -11,10 +13,14 @@ export function Stop() {
     const { stopId } = useParams();
     const navigate = useNavigate();
     const { trips, isLoading, error, refetch } = useUpcomingTrips(stopId);
+    const [stopName, setStopName] = useState(stopId);
 
-    // For now, use stopId as the display name
-    // TODO: Fetch stop details to get actual name
-    const stopName = stopId;
+    // Fetch stop details to get actual name
+    useEffect(() => {
+        getStopDetails(stopId)
+            .then(data => setStopName(data.properties?.name || stopId))
+            .catch(err => console.error('Failed to fetch stop details:', err));
+    }, [stopId]);
 
     const handleBusClick = (trip) => {
         // Navigate to trip detail page (Flow 3 - future)

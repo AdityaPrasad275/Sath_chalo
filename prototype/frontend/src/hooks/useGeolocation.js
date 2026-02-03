@@ -35,7 +35,7 @@ export function useGeolocation() {
     useEffect(() => {
         // Check for mock location mode
         if (shouldMockLocation()) {
-            console.log('🧪 Using mock location:', DEV_MOCK_LOCATION);
+            // console.log('🧪 Using mock location:', DEV_MOCK_LOCATION);
             setPosition(DEV_MOCK_LOCATION);
             setPermissionState('granted');
             setIsMocked(true);
