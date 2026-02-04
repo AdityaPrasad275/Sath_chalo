@@ -23,8 +23,11 @@ export function Stop() {
     }, [stopId]);
 
     const handleBusClick = (trip) => {
-        // Navigate to trip detail page (Flow 3 - future)
-        console.log('Navigate to trip:', trip);
+        // Navigate to trip detail page with user's current stop
+        const tripId = trip.trip?.trip_id;
+        if (tripId) {
+            navigate(`/trip/${tripId}?userStop=${stopId}`);
+        }
     };
 
     return (
@@ -74,7 +77,7 @@ export function Stop() {
 
                 {!isLoading && !error && trips.length > 0 && (
                     <div className="stop__buses">
-                        <h2 className="stop__section-title">Upcoming Buses</h2>
+                        <h2 className="stop__section-title">Upcoming Buses in 1 hour</h2>
                         <div className="stop__buses-list">
                             {trips.map((trip, index) => (
                                 <BusCard

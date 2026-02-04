@@ -200,3 +200,6 @@ export function ChevronDownIcon({ className = '', ...props }) {
     );
 }
 
+// Timeline-specific components
+export { TimelineNode } from './TimelineNode';
+export { BusIcon as BusIconFilled } from './BusIcon';

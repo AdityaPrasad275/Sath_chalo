@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getUpcomingTrips } from '../utils/api';
+import { convertUtcToIst } from '../utils/time';
 
 /**
  * Hook to fetch upcoming trips/buses for a specific stop
@@ -25,8 +26,16 @@ export function useUpcomingTrips(stopId) {
                 const data = await getUpcomingTrips(stopId);
                 // Extract results from paginated response
                 const results = data.results || data;
+
+                // WORKAROUND: Convert UTC times from backend to IST
+                const tripsInIst = results.map(trip => ({
+                    ...trip,
+                    arrival_time: convertUtcToIst(trip.arrival_time),
+                    departure_time: convertUtcToIst(trip.departure_time)
+                }));
+
                 if (!cancelled) {
-                    setTrips(results);
+                    setTrips(tripsInIst);
                     setIsLoading(false);
                 }
             } catch (err) {
@@ -52,7 +61,15 @@ export function useUpcomingTrips(stopId) {
         try {
             const data = await getUpcomingTrips(stopId);
             const results = data.results || data;
-            setTrips(results);
+
+            // WORKAROUND: Convert UTC times from backend to IST
+            const tripsInIst = results.map(trip => ({
+                ...trip,
+                arrival_time: convertUtcToIst(trip.arrival_time),
+                departure_time: convertUtcToIst(trip.departure_time)
+            }));
+
+            setTrips(tripsInIst);
         } catch (err) {
             setError(err.message || 'Failed to fetch upcoming trips');
         } finally {

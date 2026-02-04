@@ -2,6 +2,69 @@
  * Time utilities for formatting and calculating relative times
  */
 
+// ============================================================================
+// WORKAROUND: Backend returns times in UTC, but we need IST (UTC+5:30)
+// TODO: Remove these functions once backend is fixed to use Indian timezone
+// ============================================================================
+
+const IST_OFFSET_HOURS = 5;
+const IST_OFFSET_MINUTES = 30;
+const IST_OFFSET_TOTAL_MINUTES = IST_OFFSET_HOURS * 60 + IST_OFFSET_MINUTES;
+
+/**
+ * Convert UTC time string to IST time string
+ * @param {string} utcTimeStr - Time in HH:MM:SS format (UTC)
+ * @returns {string} Time in HH:MM:SS format (IST)
+ */
+export function convertUtcToIst(utcTimeStr) {
+    if (!utcTimeStr) return utcTimeStr;
+
+    const [hours, minutes, seconds] = utcTimeStr.split(':').map(Number);
+
+    // Convert to minutes since midnight
+    let totalMinutes = hours * 60 + minutes + IST_OFFSET_TOTAL_MINUTES;
+
+    // Handle day overflow (if time goes past midnight)
+    if (totalMinutes >= 24 * 60) {
+        totalMinutes -= 24 * 60;
+    }
+
+    // Convert back to HH:MM:SS
+    const istHours = Math.floor(totalMinutes / 60);
+    const istMinutes = totalMinutes % 60;
+
+    return `${String(istHours).padStart(2, '0')}:${String(istMinutes).padStart(2, '0')}:${String(seconds || 0).padStart(2, '0')}`;
+}
+
+/**
+ * Get current time in IST as HH:MM:SS
+ * @returns {string} Current time in IST
+ */
+export function getCurrentIstTime() {
+    const now = new Date();
+
+    // Get UTC time
+    const utcHours = now.getUTCHours();
+    const utcMinutes = now.getUTCMinutes();
+    const utcSeconds = now.getUTCSeconds();
+
+    // Add IST offset
+    let totalMinutes = utcHours * 60 + utcMinutes + IST_OFFSET_TOTAL_MINUTES;
+
+    if (totalMinutes >= 24 * 60) {
+        totalMinutes -= 24 * 60;
+    }
+
+    const istHours = Math.floor(totalMinutes / 60);
+    const istMinutes = totalMinutes % 60;
+
+    return `${String(istHours).padStart(2, '0')}:${String(istMinutes).padStart(2, '0')}:${String(utcSeconds).padStart(2, '0')}`;
+}
+
+// ============================================================================
+// End of workaround
+// ============================================================================
+
 /**
  * Parse a time string (HH:MM:SS) into minutes since midnight
  * @param {string} timeStr - Time in HH:MM:SS format
@@ -13,14 +76,12 @@ export function parseTimeToMinutes(timeStr) {
 }
 
 /**
- * Get current time as minutes since midnight (in UTC to match server)
- * Note: Backend runs in UTC, so we need to compare in UTC
- * @returns {number} Minutes since midnight UTC
+ * Get current time as minutes since midnight (in IST)
+ * @returns {number} Minutes since midnight IST
  */
 export function getCurrentTimeMinutes() {
-    const now = new Date();
-    // Use UTC hours/minutes to match backend server time
-    return now.getUTCHours() * 60 + now.getUTCMinutes();
+    const currentIstTime = getCurrentIstTime();
+    return parseTimeToMinutes(currentIstTime);
 }
 
 /**
@@ -51,7 +112,7 @@ export function formatRelativeTime(minutes) {
         return '< 1 min';
     }
     if (minutes < 60) {
-        return `In ${Math.round(minutes)} min`;
+        return `in ${Math.round(minutes)} min`;
     }
     const hours = Math.floor(minutes / 60);
     const mins = Math.round(minutes % 60);
