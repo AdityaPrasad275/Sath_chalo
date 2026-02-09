@@ -18,9 +18,14 @@ class StopTimeSerializer(serializers.ModelSerializer):
     stop_lat = serializers.FloatField(source='stop.geom.y', read_only=True)
     stop_lon = serializers.FloatField(source='stop.geom.x', read_only=True)
     
+    # Use property methods for readable time strings
+    arrival_time = serializers.CharField(source='arrival_time_str', read_only=True)
+    departure_time = serializers.CharField(source='departure_time_str', read_only=True)
+    
     class Meta:
         model = StopTime
-        fields = ['stop', 'stop_name', 'stop_lat', 'stop_lon', 'stop_sequence', 'arrival_time', 'departure_time']
+        fields = ['stop', 'stop_name', 'stop_lat', 'stop_lon', 'stop_sequence', 
+                  'arrival_seconds', 'departure_seconds', 'arrival_time', 'departure_time']
 
 class TripSerializer(serializers.ModelSerializer):
     route_name = serializers.CharField(source='route.short_name', read_only=True)
@@ -37,7 +42,9 @@ class TripDetailSerializer(TripSerializer):
 
 class UpcomingTripSerializer(serializers.ModelSerializer):
     trip = TripSerializer(read_only=True)
+    arrival_time = serializers.CharField(source='arrival_time_str', read_only=True)
+    departure_time = serializers.CharField(source='departure_time_str', read_only=True)
     
     class Meta:
         model = StopTime
-        fields = ['trip', 'arrival_time', 'departure_time', 'stop_sequence']
+        fields = ['trip', 'arrival_seconds', 'departure_seconds', 'arrival_time', 'departure_time', 'stop_sequence']
