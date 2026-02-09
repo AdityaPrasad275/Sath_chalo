@@ -134,7 +134,7 @@ class GTFSGenerator:
             while current_minutes < end_minutes:
                 trip_id = f"T_{route['id']}_{trip_counter:04d}"
                 service_id = "WEEKDAY"
-                shape_id = "" # Shapes not implemented in v0.1
+                shape_id = f"SH_{route['id']}"
                 
                 trips_writer.writerow([route['id'], service_id, trip_id, shape_id])
                 
@@ -170,11 +170,27 @@ class GTFSGenerator:
         st_file.close()
         print("Generated trips.txt and stop_times.txt")
 
+    def generate_shapes(self):
+        print("Generating shapes...")
+        with open(f"{OUTPUT_DIR}/shapes.txt", "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["shape_id", "shape_pt_lat", "shape_pt_lon", "shape_pt_sequence"])
+            
+            for route in self.routes:
+                shape_id = f"SH_{route['id']}"
+                # The shape is just the sequence of stops
+                for i, stop in enumerate(route['stops']):
+                    # sequence is 1-based
+                    writer.writerow([shape_id, stop['lat'], stop['lon'], i + 1])
+                    
+        print("Generated shapes.txt")
+
     def run(self):
         self.generate_agency()
         self.generate_stops()
         self.generate_calendar()
         self.generate_routes()
+        self.generate_shapes()
         self.generate_trips_and_stop_times()
         print(f"Done! GTFS data generated in ./{OUTPUT_DIR}")
 

@@ -1,8 +1,8 @@
 import csv
 import os
 from django.core.management.base import BaseCommand
-from django.contrib.gis.geos import Point
-from gtfs.models import Agency, Stop, Route, Trip, StopTime
+from django.contrib.gis.geos import Point, LineString
+from gtfs.models import Agency, Stop, Route, Trip, StopTime, Shape
 from gtfs.utils.time_helpers import gtfs_time_to_seconds
 
 class Command(BaseCommand):
@@ -20,12 +20,14 @@ class Command(BaseCommand):
         Trip.objects.all().delete()
         Route.objects.all().delete()
         Stop.objects.all().delete()
+        Shape.objects.all().delete()
         Agency.objects.all().delete()
 
         # Import in dependency order
         self.import_agencies(os.path.join(folder_path, 'agency.txt'))
         self.import_stops(os.path.join(folder_path, 'stops.txt'))
         self.import_routes(os.path.join(folder_path, 'routes.txt'))
+        self.import_shapes(os.path.join(folder_path, 'shapes.txt'))
         self.import_trips(os.path.join(folder_path, 'trips.txt'), os.path.join(folder_path, 'stop_times.txt'))
         self.import_stop_times(os.path.join(folder_path, 'stop_times.txt'))
         
@@ -124,6 +126,36 @@ class Command(BaseCommand):
                 ))
         Trip.objects.bulk_create(trips)
         self.stdout.write(f"Created {len(trips)} trips.")
+
+    def import_shapes(self, path):
+        self.stdout.write(f"Importing shapes from {path}...")
+        if not os.path.exists(path):
+             self.stdout.write(self.style.WARNING(f"No shapes.txt found at {path}, skipping shapes."))
+             return
+
+        shape_points = {}
+        with open(path, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                sid = row['shape_id']
+                seq = int(row['shape_pt_sequence'])
+                lat = float(row['shape_pt_lat'])
+                lon = float(row['shape_pt_lon'])
+                
+                if sid not in shape_points:
+                    shape_points[sid] = []
+                shape_points[sid].append((seq, lat, lon))
+        
+        shapes = []
+        for sid, points in shape_points.items():
+            # Sort by sequence
+            points.sort(key=lambda x: x[0])
+            # Create LineString (lon, lat)
+            line = LineString([(p[2], p[1]) for p in points], srid=4326)
+            shapes.append(Shape(shape_id=sid, geometry=line))
+            
+        Shape.objects.bulk_create(shapes)
+        self.stdout.write(f"Created {len(shapes)} shapes.")
 
     def import_stop_times(self, path):
         self.stdout.write(f"Importing stop_times from {path}...")

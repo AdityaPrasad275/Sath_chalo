@@ -29,11 +29,18 @@ class Route(models.Model):
     def __str__(self):
         return f"{self.short_name} - {self.long_name}"
 
+class Shape(models.Model):
+    shape_id = models.CharField(max_length=255, primary_key=True)
+    geometry = models.LineStringField(srid=4326)
+    
+    def __str__(self):
+        return self.shape_id
+
 class Trip(models.Model):
     trip_id = models.CharField(max_length=255, primary_key=True)
     route = models.ForeignKey(Route, on_delete=models.CASCADE, related_name='trips')
     headed_to = models.CharField(max_length=255, null=True, blank=True)
-    shape_id = models.CharField(max_length=255, null=True, blank=True)
+    shape = models.ForeignKey(Shape, on_delete=models.SET_NULL, null=True, blank=True, related_name='trips')
     service_id = models.CharField(max_length=255)
 
     def __str__(self):

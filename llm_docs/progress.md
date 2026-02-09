@@ -181,7 +181,32 @@ From [backend_analysis.md](file:///home/ap/.gemini/antigravity/brain/c93756d8-f7
 
 **Details**: See [Phase 2 Walkthrough](file:///home/ap/.gemini/antigravity/brain/d8731a22-8e8b-4583-a7ce-5f40a9c4a7a7/walkthrough.md)
 
-### Phase 3: Shape Data & Route Deviations 🎯 NEXT
+### Phase 3: Shape Data & Route Deviations 🚧 IN PROGRESS
+
+**Goal**: Enable map visualization and deviation detection.
+
+**Status**: Foundation Built (Shape Data + Logic) ✅
+
+**What Was Built**:
+#### 3.1 Shape Data Pipeline ✅
+- **Generator**: Updated `gtfs_generator.py` to create `shapes.txt` (straight lines between stops).
+- **Database**:
+  - NEW `Shape` model (LineString geometry).
+  - Updated `Trip` model to link to `Shape`.
+- **Ingestion**: Updated `ingest_gtfs` to parse shapes and link them.
+
+#### 3.2 Spatial Logic ✅
+- **File**: [`gtfs/utils/spatial.py`](file:///home/ap/Personal_Files/coding/gt/prototype/backend/gtfs/utils/spatial.py)
+- **Features**:
+  - `get_distance_on_shape(point, shape)`: Dist from point to line in meters.
+  - `is_off_route(point, shape)`: Returns True if > 50m deviation.
+
+**Verification**:
+- Script [`verify_shapes.py`](file:///home/ap/Personal_Files/coding/gt/prototype/backend/verify_shapes.py) confirmed data integrity and logic correctness.
+- 100% of trips linked to shapes.
+- Deviation logic correctly identifies test points.
+
+**Next**: Integrate into Observation API.
 
 ---
 
