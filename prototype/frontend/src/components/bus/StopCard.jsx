@@ -15,24 +15,24 @@ export function StopCard({
     const nodeState = isUserStop ? 'user' : status;
 
     return (
-        <div className={`stop-card ${status === 'passed' ? 'stop-card--passed' : ''}`}>
+        <div className={`timeline-stop ${status === 'passed' ? 'timeline-stop--passed' : ''}`}>
             {/* Timeline graphic - absolutely positioned to left */}
-            <div className="stop-card__graphic">
+            <div className="timeline-stop__graphic">
                 <TimelineNode position={position} state={nodeState} height={64} />
             </div>
 
             {/* Content - has left padding to clear graphic */}
-            <div className="stop-card__content">
-                <div className="stop-card__name">{stopName}</div>
+            <div className="timeline-stop__content">
+                <div className="timeline-stop__name">{stopName}</div>
 
                 {isUserStop && (
-                    <span className="stop-card__label stop-card__label--user">
+                    <span className="timeline-stop__label timeline-stop__label--user">
                         Your stop
                     </span>
                 )}
             </div>
 
-            <div className="stop-card__time">{scheduledTime}</div>
+            <div className="timeline-stop__time">{scheduledTime}</div>
         </div>
     );
 }

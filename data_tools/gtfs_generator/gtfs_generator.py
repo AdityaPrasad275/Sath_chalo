@@ -17,7 +17,7 @@ NUM_ROUTES = 5
 TRIPS_PER_ROUTE = 10
 
 START_HOUR = 6
-END_HOUR = 22
+END_HOUR = 26  # Will create trips up to 02:00 (26:00 in GTFS format)
 FREQUENCY_MINUTES = 30
 
 AGENCY_NAME = "Small World Transit"
@@ -127,10 +127,11 @@ class GTFSGenerator:
         
         for route in self.routes:
             # Generate trips throughout the day
-            current_time = datetime.datetime(2024, 1, 1, START_HOUR, 0, 0)
-            end_time = datetime.datetime(2024, 1, 1, END_HOUR, 0, 0)
+            # Use minutes since start of day to handle > 24 hour times
+            current_minutes = START_HOUR * 60
+            end_minutes = END_HOUR * 60
             
-            while current_time < end_time:
+            while current_minutes < end_minutes:
                 trip_id = f"T_{route['id']}_{trip_counter:04d}"
                 service_id = "WEEKDAY"
                 shape_id = "" # Shapes not implemented in v0.1
@@ -138,7 +139,7 @@ class GTFSGenerator:
                 trips_writer.writerow([route['id'], service_id, trip_id, shape_id])
                 
                 # Generate stop times
-                trip_cursor_time = current_time
+                trip_cursor_minutes = current_minutes
                 sequence = 1
                 
                 for i, stop in enumerate(route['stops']):
@@ -148,16 +149,21 @@ class GTFSGenerator:
                         dist_km = get_distance(prev_stop['lat'], prev_stop['lon'], stop['lat'], stop['lon'])
                         # Assume 20km/h average speed in city
                         minutes_travel = (dist_km / 20.0) * 60
-                        # Add some dwell time (0.5 to 1.5 min)
+                        # Add some dwell time (0.5 min)
                         dwell = 0.5
-                        trip_cursor_time += datetime.timedelta(minutes=minutes_travel + dwell)
+                        trip_cursor_minutes += minutes_travel + dwell
                     
-                    time_str = trip_cursor_time.strftime("%H:%M:%S")
+                    # Convert minutes to HH:MM:SS format (can be > 24:00:00)
+                    hours = int(trip_cursor_minutes // 60)
+                    minutes = int(trip_cursor_minutes % 60)
+                    seconds = int((trip_cursor_minutes * 60) % 60)
+                    time_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+                    
                     st_writer.writerow([trip_id, time_str, time_str, stop['id'], sequence])
                     sequence += 1
                 
                 # Next trip
-                current_time += datetime.timedelta(minutes=FREQUENCY_MINUTES)
+                current_minutes += FREQUENCY_MINUTES
                 trip_counter += 1
                 
         trips_file.close()

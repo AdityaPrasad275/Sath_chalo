@@ -29,3 +29,29 @@ export function formatDistance(meters) {
     }
     return `${(meters / 1000).toFixed(1)}km`;
 }
+
+/**
+ * Format distance with smart rounding for better UX
+ * Since we're using Haversine (as-the-crow-flies) distance, 
+ * exact values don't make sense. Round to sensible increments.
+ * @param {number} meters - distance in meters
+ * @returns {string} - formatted string like "50m" or "1.2km"
+ */
+export function formatRoundedDistance(meters) {
+    if (meters < 50) {
+        // Under 50m: round to nearest 10m
+        return `${Math.round(meters / 10) * 10}m`;
+    } else if (meters < 100) {
+        // 50-100m: round to nearest 25m
+        return `${Math.round(meters / 25) * 25}m`;
+    } else if (meters < 500) {
+        // 100-500m: round to nearest 50m
+        return `${Math.round(meters / 50) * 50}m`;
+    } else if (meters < 1000) {
+        // 500m-1km: round to nearest 100m
+        return `${Math.round(meters / 100) * 100}m`;
+    } else {
+        // Over 1km: show with 1 decimal place
+        return `${(meters / 1000).toFixed(1)}km`;
+    }
+}
