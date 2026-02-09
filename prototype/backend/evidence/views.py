@@ -3,6 +3,8 @@ from .models import Observation
 from .serializers import ObservationSerializer
 from realtime.models import ActiveTrip, TripPosition
 from gtfs.models import Agency
+from gtfs.utils.spatial import get_distance_on_shape
+from django.contrib.gis.geos import Point
 from gtfs.utils.time_helpers import get_current_service_time, datetime_to_service_seconds
 from django.utils import timezone as django_timezone
 from datetime import timedelta
@@ -32,6 +34,24 @@ class ObservationViewSet(mixins.CreateModelMixin,
         if not observation.trip:
             return
         
+        # Deviation Check
+        if observation.lat is not None and observation.lon is not None and observation.trip.shape:
+            try:
+                # Create point (lon, lat)
+                p = Point(observation.lon, observation.lat, srid=4326)
+                shapeline = observation.trip.shape.geometry
+                
+                dist = get_distance_on_shape(p, shapeline)
+                observation.distance_from_trip = dist
+                
+                if dist > 200.0:
+                    observation.is_deviation = True
+                    print(f"Warning: Deviation detected! Observation {observation.id} is {dist:.2f}m from route.")
+                
+                observation.save()
+            except Exception as e:
+                print(f"Error calculating deviation for {observation.id}: {e}")
+
         try:
             # Get or create ActiveTrip for this trip
             active_trip, created = ActiveTrip.objects.get_or_create(

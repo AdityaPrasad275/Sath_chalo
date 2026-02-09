@@ -29,6 +29,10 @@ class Observation(models.Model):
     lat = models.FloatField(null=True, blank=True)
     lon = models.FloatField(null=True, blank=True)
     
+    # Deviation Detection
+    distance_from_trip = models.FloatField(null=True, blank=True, help_text="Meters from the linked trip's shape")
+    is_deviation = models.BooleanField(default=False, help_text="True if distance > 200m")
+    
     # Additional metadata
     notes = models.TextField(blank=True, help_text="Optional user notes or details")
 
