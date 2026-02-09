@@ -40,5 +40,21 @@ services:
     depends_on:
       - web
 
+  scheduler:
+    build: ./backend
+    command: bash /app/scheduler.sh
+    volumes:
+      - ./backend:/app
+    depends_on:
+      - db
+      - web
+    environment:
+      - POSTGRES_DB=gt_prototype
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+    restart: unless-stopped
+
 volumes:
   pg_data:
