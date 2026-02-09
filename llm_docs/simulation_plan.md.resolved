@@ -1,0 +1,65 @@
+# Phase 4: System Simulation & Full Integration
+
+## Goal
+To validate the entire backend loop (Observation -> Inference -> API) under load and over time, before building the Frontend.
+
+## 1. Design Answer: "How [upcoming](file:///home/ap/Personal_Files/coding/gt/prototype/backend/gtfs/views.py#18-71) works"
+
+Currently, `GET /api/gtfs/stops/{id}/upcoming/` only returns **Scheduled Data**.
+To support the "Waiter" user model, we must update this endpoint.
+
+### The Merging Logic
+We will query **Mixed Data** in real-time:
+1.  **Fetch Schedule**: Get [StopTime](file:///home/ap/Personal_Files/coding/gt/prototype/backend/gtfs/models.py#49-86) records for the next 2 hours.
+2.  **Fetch Realtime**: Get `ActiveTrip` records for these trips.
+3.  **Merge**:
+    -   For each scheduled trip, check if there is an `ActiveTrip`.
+    -   If Yes:
+        -   `eta = schedule + active_trip.delay`
+        -   `confidence = active_trip.confidence`
+        -   `is_realtime = True`
+    -   If No (but we have history):
+        -   `eta = schedule + predicted_delay`
+        -   `is_realtime = False`
+        -   `prediction_note = "Usually 5 min late"`
+
+## 2. Simulation Strategy
+
+We will build a robust script `simulate_system.py` that runs scenarios.
+
+### Scenario A: "The Commute" (Real-time Logic Check)
+-   **Duration**: 1 hour (Real-time or accelerated).
+-   **Actors**:
+    -   **10 Riders**: On different buses. Sending Observations every 60s.
+        -   *Variable*: Some riders report delays (bus is stuck).
+        -   *Variable*: Some riders deviate (bus takes detour).
+    -   **50 Waiters**: Polling [upcoming](file:///home/ap/Personal_Files/coding/gt/prototype/backend/gtfs/views.py#18-71) at various stops every 30s.
+-   **Metrics**:
+    -   **Latency**: How fast is [upcoming](file:///home/ap/Personal_Files/coding/gt/prototype/backend/gtfs/views.py#18-71)? (Target < 200ms).
+    -   **Freshness**: How quickly does a Rider's "I'm late" observation show up for the Waiter? (Target < 1s).
+
+### Scenario B: "The Month" (History & Patterns)
+-   **Goal**: Simulate Feb 9 to March 9 data to test Aggregation.
+-   **Method**:
+    -   Write a script to **bulk insert** [Observation](file:///home/ap/Personal_Files/coding/gt/prototype/backend/evidence/models.py#4-50) records for past 30 days.
+    -   Simulate patterns: "Route 500D is always 10 min late at 9 AM".
+    -   Run `aggregate_delays` for each day.
+-   **Check**:
+    -   Does `GET /realtime/active-trips/patterns/` output the correct stats?
+    -   Does the API predict delays for new trips?
+
+## 3. Implementation Steps
+
+### Step 1: Finish the API Integration (Blocking)
+-   [ ] Update [gtfs/views.py](file:///home/ap/Personal_Files/coding/gt/prototype/backend/gtfs/views.py) [upcoming](file:///home/ap/Personal_Files/coding/gt/prototype/backend/gtfs/views.py#18-71) to merge `ActiveTrip` data.
+-   [ ] Update [gtfs/views.py](file:///home/ap/Personal_Files/coding/gt/prototype/backend/gtfs/views.py) [upcoming](file:///home/ap/Personal_Files/coding/gt/prototype/backend/gtfs/views.py#18-71) to include "Predicted Delay" from history.
+
+### Step 2: Build the Simulator
+-   [ ] Create `backend/simulate_system.py`.
+-   [ ] Implement "UserBot" class (Rider/Waiter).
+-   [ ] Implement "HistoryGenerator" class.
+
+### Step 3: Run & Measure
+-   [ ] Run "The Month" generation.
+-   [ ] Run "The Commute" simulation.
+-   [ ] Generate Report.
