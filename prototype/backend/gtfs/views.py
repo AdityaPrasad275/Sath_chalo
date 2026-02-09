@@ -2,6 +2,7 @@ from rest_framework import viewsets, filters
 from rest_framework_gis.filters import DistanceToPointFilter
 from .serializers import StopSerializer, RouteSerializer, TripSerializer, TripDetailSerializer, UpcomingTripSerializer
 from .models import Stop, Route, Trip, StopTime
+from realtime.models import ActiveTrip
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
@@ -43,11 +44,36 @@ class StopViewSet(viewsets.ReadOnlyModelViewSet):
             arrival_seconds__lte=window_end
         ).select_related('trip', 'trip__route', 'trip__route__agency').order_by('arrival_seconds')
         
+        # Prefetch ActiveTrips for these trips
+        trip_ids = [st.trip_id for st in queryset]
+        active_trips = {
+            at.trip_id: at 
+            for at in ActiveTrip.objects.filter(trip_id__in=trip_ids)
+        }
+        
         # Serialize with actual timestamps
         results = []
         for st in queryset:
-            arrival_dt = seconds_to_actual_datetime(service_date, st.arrival_seconds, agency.timezone)
-            departure_dt = seconds_to_actual_datetime(service_date, st.departure_seconds, agency.timezone)
+            # Check for active trip
+            active_trip = active_trips.get(st.trip_id)
+            
+            # Base delay is 0
+            delay = 0
+            is_realtime = False
+            confidence = 0.0
+            
+            if active_trip:
+                delay = active_trip.delay_seconds
+                is_realtime = True
+                confidence = active_trip.confidence_score
+            
+            # Calculate adjusted arrival/departure
+            # We add the delay to the scheduled seconds
+            adjusted_arrival = st.arrival_seconds + delay
+            adjusted_departure = st.departure_seconds + delay
+            
+            arrival_dt = seconds_to_actual_datetime(service_date, adjusted_arrival, agency.timezone)
+            departure_dt = seconds_to_actual_datetime(service_date, adjusted_departure, agency.timezone)
             
             results.append({
                 'trip': {
@@ -59,7 +85,12 @@ class StopViewSet(viewsets.ReadOnlyModelViewSet):
                 'arrival_timestamp': arrival_dt.isoformat(),  # ISO8601 with timezone
                 'departure_timestamp': departure_dt.isoformat(),  # ISO8601 with timezone
                 'stop_sequence': st.stop_sequence,
-                'seconds_until_arrival': st.arrival_seconds - current_seconds
+                'seconds_until_arrival': adjusted_arrival - current_seconds,
+                
+                # Realtime info
+                'is_realtime': is_realtime,
+                'delay_seconds': delay,
+                'confidence_score': confidence
             })
         
         # Apply pagination if needed

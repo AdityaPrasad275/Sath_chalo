@@ -200,6 +200,22 @@ From [backend_analysis.md](file:///home/ap/.gemini/antigravity/brain/c93756d8-f7
 
 **Next**: Frontend Visualization.
 
+### Phase 4: Integration & Simulation 🚧 IN PROGRESS
+
+**Goal**: Validate full system loop with simulated users.
+
+**Status**: API Integration Complete ✅
+
+**What Was Built**:
+#### 4.1 API Realtime Integration ✅
+- **File**: `gtfs/views.py`
+- **Feature**: `upcoming` endpoint now fetches `ActiveTrip` data and merges it with schedule.
+- **Verification**: `verify_api_integration.py` confirms delays are propagated to API response.
+
+**Next**: Build `simulate_system.py` to run load tests.
+
+---
+
 ---
 
 ## 🗂️ Key Artifacts Reference
