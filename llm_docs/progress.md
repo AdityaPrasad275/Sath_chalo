@@ -2,7 +2,7 @@
 
 **Session Date**: Feb 9, 2026  
 **Branch**: `main` (merged `feature/observation-trip-linking`)  
-**Status**: Phase 0 Complete ✅, Ready for Phase 1
+**Status**: Phase 2 Complete ✅, Ready for Phase 3
 
 ---
 
@@ -131,7 +131,57 @@ From [backend_analysis.md](file:///home/ap/.gemini/antigravity/brain/c93756d8-f7
 
 **Details**: See [Phase 1 Walkthrough](file:///home/ap/.gemini/antigravity/brain/d8731a22-8e8b-4583-a7ce-5f40a9c4a7a7/walkthrough.md)
 
-### Phase 2: Aggregate Patterns 🎯 NEXT
+### Phase 2: Aggregate Patterns ✅ COMPLETE
+
+**Goal**: Detect systemic delays like "this route is always late during rush hour"
+
+**What Was Built**:
+
+#### 2.1 Historic Delay Model ✅
+- **File**: [`realtime/models.py`](file:///home/ap/Personal_Files/coding/gt/prototype/backend/realtime/models.py)
+- **Features**:
+  - `TripDelayHistory` model stores daily delay averages
+  - Unique constraint on `(trip, date)`
+  - Stores `avg_delay_seconds` and `num_observations`
+
+#### 2.2 Aggregation Command ✅
+- **File**: [`realtime/management/commands/aggregate_delays.py`](file:///home/ap/Personal_Files/coding/gt/prototype/backend/realtime/management/commands/aggregate_delays.py)
+- **Features**:
+  - Aggregates observations from previous day (configurable)
+  - Calculates average delay per trip
+  - Populates `TripDelayHistory` table
+  - Dry-run mode support
+
+#### 2.3 Predicted Delay API ✅
+- **File**: [`realtime/serializers.py`](file:///home/ap/Personal_Files/coding/gt/prototype/backend/realtime/serializers.py)
+- **Features**:
+  - `ActiveTrip` serializer now includes `predicted_delay_seconds`
+  - Prediction based on weighted average of last 7 days
+  - Includes `prediction_confidence` (days of data)
+
+#### 2.4 Pattern Detection Endpoint ✅
+- **File**: [`realtime/views.py`](file:///home/ap/Personal_Files/coding/gt/prototype/backend/realtime/views.py)
+- **Endpoint**: `GET /api/realtime/active-trips/patterns/`
+- **Insights**:
+  - Identifies routes with >50% trips delayed >5 min
+  - Returns aggregation statistics and analysis period
+
+#### 2.5 Scheduler Service ✅
+- **File**: [`backend/scheduler.sh`](file:///home/ap/Personal_Files/coding/gt/prototype/backend/scheduler.sh)
+- **Features**:
+  - New Docker service `scheduler` runs alongside web/db
+  - Executes `aggregate_delays` daily at 4:00 AM
+  - Auto-restarting mechanism for reliability
+
+**Testing Results**:
+- ✅ Aggregation verified (4 obs → 2 history records)
+- ✅ Predictions showing in API (34,673s predicted delay)
+- ✅ Pattern detection identifying 100% delayed routes
+- ✅ Scheduler verifying time and running command
+
+**Details**: See [Phase 2 Walkthrough](file:///home/ap/.gemini/antigravity/brain/d8731a22-8e8b-4583-a7ce-5f40a9c4a7a7/walkthrough.md)
+
+### Phase 3: Shape Data & Route Deviations 🎯 NEXT
 
 ---
 
